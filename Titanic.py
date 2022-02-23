@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
-#!pip install missingno
+!pip install missingno
 import missingno as msno
 from datetime import date
 from sklearn.metrics import accuracy_score
@@ -14,14 +14,15 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix, classification_report, plot_roc_curve
 from sklearn.model_selection import train_test_split, cross_validate
 
+#Load Data
 def load():
-    data = pd.read_csv(r"C:\Users\hp\PycharmProjects\pythonProject\2. HAFTA\titanic.csv")
+    data = pd.read_csv(r"C:\Users\hp\PycharmProjects\pythonProject\titanic.csv")
     return data
 
 df_ = load()
 
 df= df_.copy()
-#Genel resmi inceleme
+
 
 def check_df(dataframe, head=5):
     print("##################### Shape #####################")
@@ -39,7 +40,7 @@ def check_df(dataframe, head=5):
 
 check_df(df)
 
-#Numerik ve kategorik değişkenleri yakalama
+#Grabbing numeric and categorical variables
 
 def grab_col_names(dataframe, cat_th=10, car_th=20):
     """
@@ -103,7 +104,7 @@ def grab_col_names(dataframe, cat_th=10, car_th=20):
 
 cat_cols, num_cols, cat_but_car = grab_col_names(df)
 
-#Numerik ve kategorik değişken analizleri
+#Numeric and categorical variable analysis
 
 def cat_summary(dataframe, col_name, plot=False):
     print(pd.DataFrame({col_name: dataframe[col_name].value_counts(),
@@ -134,7 +135,7 @@ for col in num_cols:
     num_summary(df, col, plot=True)
 
 
-#Aykırı gözlem analizi
+#Outlier Analysis
 
 def outlier_thresholds(dataframe, col_name, q1=0.05, q3=0.95):
     quartile1 = dataframe[col_name].quantile(q1)
@@ -179,6 +180,8 @@ def remove_outlier(dataframe, col_name):
 
 df=remove_outlier(df,"Fare")
 
+#Missing Observation Analysis
+
 df.isnull().sum()
 
 df["Embarked"]=df["Embarked"].fillna(df["Embarked"].mode()[0])
@@ -196,6 +199,8 @@ def missing_values_table(dataframe, na_name=False):
 
 na_columns = missing_values_table(df, na_name=True)
 
+
+#Correlation analysis
 
 corr = df[num_cols].corr()
 corr
@@ -220,9 +225,12 @@ def high_correlated_cols(dataframe, plot=False, corr_th=0.70):
 high_correlated_cols(df, plot=True)
 
 
+#Feature Engineering
+
+#Age Levels
 df["NEW_AGE_CAT"]=pd.cut(x=df["Age"], bins= [0,18,30,50,100], labels=["child","young","mature","senior"])
 
-#Agexsex
+#AgexSex
 df.head()
 df.loc[(df["NEW_AGE_CAT"]=="child") & (df["Sex"]=="female"),"NEW_SEX_CAT"]= "child female"
 df.loc[(df["NEW_AGE_CAT"]=="child") & (df["Sex"]=="male"),"NEW_SEX_CAT"]= "child male"
@@ -240,11 +248,12 @@ df["NEW_FAMSİZE_CAT"]= df["SibSp"]+ df["Parch"]
 df.loc[(df["NEW_FAMSİZE_CAT"]==0) ,"NEW_ALONE_CAT"]= 1
 df.loc[(df["NEW_FAMSİZE_CAT"]>0)  ,"NEW_ALONE_CAT"]= 0
 
-df.head()
+
+#Grabbing numeric and categorical variables
 
 cat_cols, num_cols, cat_but_car = grab_col_names(df)
 
-#Encoding İşlemleri
+#Encoding 
 
 #Label Encoding
 
@@ -270,7 +279,7 @@ def one_hot_encoder(dataframe, categorical_cols, drop_first=True):
 
 df = one_hot_encoder(df, cat_cols, drop_first=True)
 
-#Standartlaştırma
+#Standardization
 
 #Standard Scaler
 
@@ -305,7 +314,7 @@ cv_results['test_recall'].mean()
 
 cv_results['test_f1'].mean()
 
-cv_results['test_roc_auc'].mean()
+cv_results['test_roc_auc'].mean() #0.856678480237775
 
 
 
